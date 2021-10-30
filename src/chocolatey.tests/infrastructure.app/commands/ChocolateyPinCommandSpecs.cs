@@ -70,8 +70,8 @@ namespace chocolatey.tests.infrastructure.app.commands
 
             public void reset()
             {
-                packageInfoService.ResetCalls();
-                nugetService.ResetCalls();
+                packageInfoService.Invocations.Clear();
+                nugetService.Invocations.Clear();
             }
         }
 

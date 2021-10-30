@@ -40,31 +40,23 @@ namespace chocolatey.infrastructure.registration
         }
 
         /// <summary>
-        ///   Gets the given <paramref name="implementationType" />'s constructor that can be used by the
-        ///   container to create that instance.
+        ///   Gets the given <paramref name="implementationType" />'s constructor that can be used by the container
+        ///   to create that instance. In case no suitable constructor can be found, null is
+        ///   returned and the errorMessage will contain the reason why the resolution failed.
         /// </summary>
-        /// <param name="serviceType">Type of the abstraction that is requested.</param>
         /// <param name="implementationType">Type of the implementation to find a suitable constructor for.</param>
+        /// <param name="errorMessage">The reason why the resolution failed.</param>
         /// <returns>
-        ///   The <see cref="T:System.Reflection.ConstructorInfo" />.
+        ///   The <see cref="T:System.Reflection.ConstructorInfo" /> or null.
         /// </returns>
-        /// <exception cref="T:SimpleInjector.ActivationException">Thrown when no suitable constructor could be found.</exception>
-        public ConstructorInfo GetConstructor(Type serviceType, Type implementationType)
+        /// <exception cref="T:System.ArgumentNullException">Thrown when implementationType is null.</exception>
+        public ConstructorInfo TryGetConstructor(Type implementationType, out string errorMessage)
         {
-            if (serviceType.IsAssignableFrom(implementationType))
-            {
-                var longestConstructor = (from constructor in implementationType.GetConstructors()
-                                          orderby constructor.GetParameters().Count() descending
-                                          select constructor).Take(1);
-
-                if (longestConstructor.Any())
-                {
-                    return longestConstructor.First();
-                }
-            }
-
-            // fall back to the container's default behavior.
-            return _originalBehavior.GetConstructor(serviceType, implementationType);
+            errorMessage = null;
+            return implementationType.GetConstructors()
+                                     .OrderByDescending(constructor => constructor.GetParameters().Length)
+                                     .FirstOrDefault() 
+                   ?? _originalBehavior.TryGetConstructor(implementationType, out errorMessage);
         }
     }
 }

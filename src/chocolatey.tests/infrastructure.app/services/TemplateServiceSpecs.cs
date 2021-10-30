@@ -38,7 +38,7 @@ namespace chocolatey.tests.infrastructure.app.services
 
             public override void Context()
             {
-                fileSystem.ResetCalls();
+                fileSystem.Invocations.Clear();
 
                 service = new TemplateService(fileSystem.Object);
             }

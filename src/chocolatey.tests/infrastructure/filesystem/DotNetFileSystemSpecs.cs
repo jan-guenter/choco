@@ -47,7 +47,7 @@ namespace chocolatey.tests.infrastructure.filesystem
             [Fact]
             public void GetFullPath_should_return_the_full_path_to_an_item()
             {
-                FileSystem.get_full_path("test.txt").ShouldEqual(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "test.txt"));
+                FileSystem.get_full_path("test.txt").ShouldEqual(Path.Combine(TestContext.CurrentContext.WorkDirectory, "test.txt"));
             }
 
             [Fact]
@@ -120,10 +120,12 @@ namespace chocolatey.tests.infrastructure.filesystem
             }
 
             [Fact]
-            [ExpectedException(typeof(ApplicationException), MatchType = MessageMatch.StartsWith, ExpectedMessage = "Cannot combine a path with")]
             public void Combine_should_error_if_any_path_but_the_primary_contains_colon()
             {
-                FileSystem.combine_paths("C:\\temp", "C:");
+                Assert.Throws<ApplicationException>(() => 
+                {
+                    FileSystem.combine_paths("C:\\temp", "C:");
+                })?.Message.ShouldStartWith("Cannot combine a path with");
             }
         }
 
@@ -148,7 +150,7 @@ namespace chocolatey.tests.infrastructure.filesystem
 
             private void reset()
             {
-                _environment.ResetCalls();
+                _environment.Invocations.Clear();
             }
 
             [Fact]

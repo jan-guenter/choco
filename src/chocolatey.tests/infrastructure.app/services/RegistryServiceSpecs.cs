@@ -41,8 +41,8 @@ namespace chocolatey.tests.infrastructure.app.services
 
             protected void reset()
             {
-                FileSystem.ResetCalls();
-                XmlService.ResetCalls();
+                FileSystem.Invocations.Clear();
+                XmlService.Invocations.Clear();
                 MockLogger.reset();
             }
         }

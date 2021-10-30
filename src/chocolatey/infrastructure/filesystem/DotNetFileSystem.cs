@@ -41,8 +41,6 @@ namespace chocolatey.infrastructure.filesystem
     {
         private readonly int TIMES_TO_TRY_OPERATION = 3;
         private static Lazy<IEnvironment> environment_initializer = new Lazy<IEnvironment>(() => new Environment());
-        private const int MAX_PATH_FILE = 255;
-        private const int MAX_PATH_DIRECTORY = 248;
 
         private void allow_retries(Action action, bool isSilent = false)
         {
@@ -100,14 +98,7 @@ namespace chocolatey.infrastructure.filesystem
         {
             if (string.IsNullOrWhiteSpace(path)) return path;
 
-            try
-            {
-                return Path.GetFullPath(path);
-            }
-            catch (IOException)
-            {
-                return Alphaleonis.Win32.Filesystem.Path.GetFullPath(path);
-            }
+            return Path.GetFullPath(path);
         }
 
         public string get_temp_path()
@@ -204,14 +195,7 @@ namespace chocolatey.infrastructure.filesystem
 
         public bool file_exists(string filePath)
         {
-            try
-            {
-                return File.Exists(filePath);
-            }
-            catch (IOException)
-            {
-                return Alphaleonis.Win32.Filesystem.File.Exists(filePath);
-            }
+            return File.Exists(filePath);
         }
 
         public string get_file_name(string filePath)
@@ -233,21 +217,9 @@ namespace chocolatey.infrastructure.filesystem
             return Path.GetExtension(filePath.Replace('\\', '/'));
         }
 
-        public dynamic get_file_info_for(string filePath)
+        public FileInfo get_file_info_for(string filePath)
         {
-            try
-            {
-                if (!string.IsNullOrWhiteSpace(filePath) && filePath.Length >= MAX_PATH_FILE)
-                {
-                    return new Alphaleonis.Win32.Filesystem.FileInfo(filePath);
-                }
-
-                return new FileInfo(filePath);
-            }
-            catch (IOException)
-            {
-                return new Alphaleonis.Win32.Filesystem.FileInfo(filePath);
-            }
+            return new FileInfo(filePath);
         }
 
         public System.DateTime get_file_modified_date(string filePath)
@@ -265,7 +237,7 @@ namespace chocolatey.infrastructure.filesystem
             return FileVersionInfo.GetVersionInfo(get_full_path(filePath)).FileVersion;
         }
 
-        public bool is_system_file(dynamic file)
+        public bool is_system_file(FileInfo file)
         {
             bool isSystemFile = ((file.Attributes & FileAttributes.System) == FileAttributes.System);
             if (!isSystemFile)
@@ -283,13 +255,13 @@ namespace chocolatey.infrastructure.filesystem
             return isSystemFile;
         }
 
-        public bool is_readonly_file(dynamic file)
+        public bool is_readonly_file(FileInfo file)
         {
             bool isReadOnlyFile = ((file.Attributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly);
             if (!isReadOnlyFile)
             {
                 //check the directory to be sure
-                dynamic directoryInfo = get_directory_info_for(file.DirectoryName);
+                var directoryInfo = get_directory_info_for(file.DirectoryName);
                 isReadOnlyFile = ((directoryInfo.Attributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly);
             }
             else
@@ -301,7 +273,7 @@ namespace chocolatey.infrastructure.filesystem
             return isReadOnlyFile;
         }
 
-        public bool is_hidden_file(dynamic file)
+        public bool is_hidden_file(FileInfo file)
         {
             bool isHiddenFile = ((file.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden);
             if (!isHiddenFile)
@@ -319,7 +291,7 @@ namespace chocolatey.infrastructure.filesystem
             return isHiddenFile;
         }
 
-        public bool is_encrypted_file(dynamic file)
+        public bool is_encrypted_file(FileInfo file)
         {
             bool isEncrypted = ((file.Attributes & FileAttributes.Encrypted) == FileAttributes.Encrypted);
             string fullName = file.FullName;
@@ -327,7 +299,7 @@ namespace chocolatey.infrastructure.filesystem
             return isEncrypted;
         }
 
-        public string get_file_date(dynamic file)
+        public string get_file_date(FileInfo file)
         {
             return file.CreationTime < file.LastWriteTime
                        ? file.CreationTime.Date.ToString("yyyyMMdd")
@@ -341,14 +313,7 @@ namespace chocolatey.infrastructure.filesystem
             allow_retries(
                 () =>
                 {
-                    try
-                    {
-                        File.Move(filePath, newFilePath);
-                    }
-                    catch (IOException)
-                    {
-                        Alphaleonis.Win32.Filesystem.File.Move(filePath, newFilePath);
-                    }
+                    File.Move(filePath, newFilePath);
                 });
             //Thread.Sleep(10);
         }
@@ -361,14 +326,7 @@ namespace chocolatey.infrastructure.filesystem
             allow_retries(
                 () =>
                 {
-                    try
-                    {
-                        File.Copy(sourceFilePath, destinationFilePath, overwriteExisting);
-                    }
-                    catch (IOException)
-                    {
-                        Alphaleonis.Win32.Filesystem.File.Copy(sourceFilePath, destinationFilePath, overwriteExisting);
-                    }
+                    File.Copy(sourceFilePath, destinationFilePath, overwriteExisting);
                 });
         }
 
@@ -400,53 +358,46 @@ namespace chocolatey.infrastructure.filesystem
             allow_retries(
                 () =>
                 {
-                    try
+                    // File.Replace is very sensitive to issues with file access
+                    // the docs mention that using a backup fixes this, but this
+                    // has not been the case with choco - the backup file has been
+                    // the most sensitive to issues with file locking
+                    //File.Replace(sourceFilePath, destinationFilePath, backupFilePath);
+
+                    // move existing file to backup location
+                    if (!string.IsNullOrEmpty(backupFilePath) && file_exists(destinationFilePath))
                     {
-                        // File.Replace is very sensitive to issues with file access
-                        // the docs mention that using a backup fixes this, but this
-                        // has not been the case with choco - the backup file has been
-                        // the most sensitive to issues with file locking
-                        //File.Replace(sourceFilePath, destinationFilePath, backupFilePath);
-
-                        // move existing file to backup location
-                        if (!string.IsNullOrEmpty(backupFilePath) && file_exists(destinationFilePath))
-                        {
-                            try
-                            {
-                                this.Log().Trace("Backing up '{0}' to '{1}'.".format_with(destinationFilePath, backupFilePath));
-
-                                if (file_exists(backupFilePath))
-                                {
-                                    this.Log().Trace("Deleting existing backup file at '{0}'.".format_with(backupFilePath));
-                                    delete_file(backupFilePath);
-                                }
-                                this.Log().Trace("Moving '{0}' to '{1}'.".format_with(destinationFilePath, backupFilePath));
-                                move_file(destinationFilePath, backupFilePath);
-                            }
-                            catch (Exception ex)
-                            {
-                                this.Log().Debug("Error capturing backup of '{0}':{1} {2}".format_with(destinationFilePath, Environment.NewLine, ex.Message));
-                            }
-                        }
-
-                        // copy source file to destination
-                        this.Log().Trace("Copying '{0}' to '{1}'.".format_with(sourceFilePath, destinationFilePath));
-                        copy_file(sourceFilePath, destinationFilePath, overwriteExisting: true);
-                        
-                        // delete source file
                         try
                         {
-                            this.Log().Trace("Removing '{0}'".format_with(sourceFilePath));
-                            delete_file(sourceFilePath);
+                            this.Log().Trace("Backing up '{0}' to '{1}'.".format_with(destinationFilePath, backupFilePath));
+
+                            if (file_exists(backupFilePath))
+                            {
+                                this.Log().Trace("Deleting existing backup file at '{0}'.".format_with(backupFilePath));
+                                delete_file(backupFilePath);
+                            }
+                            this.Log().Trace("Moving '{0}' to '{1}'.".format_with(destinationFilePath, backupFilePath));
+                            move_file(destinationFilePath, backupFilePath);
                         }
                         catch (Exception ex)
                         {
-                            this.Log().Debug("Error removing '{0}':{1} {2}".format_with(sourceFilePath, Environment.NewLine, ex.Message));
+                            this.Log().Debug("Error capturing backup of '{0}':{1} {2}".format_with(destinationFilePath, Environment.NewLine, ex.Message));
                         }
                     }
-                    catch (IOException)
+
+                    // copy source file to destination
+                    this.Log().Trace("Copying '{0}' to '{1}'.".format_with(sourceFilePath, destinationFilePath));
+                    copy_file(sourceFilePath, destinationFilePath, overwriteExisting: true);
+                    
+                    // delete source file
+                    try
                     {
-                        Alphaleonis.Win32.Filesystem.File.Replace(sourceFilePath, destinationFilePath, backupFilePath);
+                        this.Log().Trace("Removing '{0}'".format_with(sourceFilePath));
+                        delete_file(sourceFilePath);
+                    }
+                    catch (Exception ex)
+                    {
+                        this.Log().Debug("Error removing '{0}':{1} {2}".format_with(sourceFilePath, Environment.NewLine, ex.Message));
                     }
                 });
         }
@@ -476,14 +427,7 @@ namespace chocolatey.infrastructure.filesystem
                 allow_retries(
                     () =>
                     {
-                        try
-                        {
-                            File.Delete(filePath);
-                        }
-                        catch (IOException)
-                        {
-                            Alphaleonis.Win32.Filesystem.File.Delete(filePath);
-                        }
+                        File.Delete(filePath);
                     });
             }
         }
@@ -495,14 +439,7 @@ namespace chocolatey.infrastructure.filesystem
 
         public string read_file(string filePath)
         {
-            try
-            {
-                return File.ReadAllText(filePath, get_file_encoding(filePath));
-            }
-            catch (IOException)
-            {
-                return Alphaleonis.Win32.Filesystem.File.ReadAllText(filePath, get_file_encoding(filePath));
-            }
+            return File.ReadAllText(filePath, get_file_encoding(filePath));
         }
 
         public byte[] read_file_bytes(string filePath)
@@ -585,48 +522,17 @@ namespace chocolatey.infrastructure.filesystem
                 filePath = filePath.Replace('\\', '/');
             }
 
-            try
-            {
-                return Path.GetDirectoryName(filePath);
-            }
-            catch (IOException)
-            {
-                return Alphaleonis.Win32.Filesystem.Path.GetDirectoryName(filePath);
-            }
+            return Path.GetDirectoryName(filePath);
         }
 
-        public dynamic get_directory_info_for(string directoryPath)
+        public DirectoryInfo get_directory_info_for(string directoryPath)
         {
-            try
-            {
-                if (!string.IsNullOrWhiteSpace(directoryPath) && directoryPath.Length >= MAX_PATH_DIRECTORY)
-                {
-                    return new Alphaleonis.Win32.Filesystem.DirectoryInfo(directoryPath);
-                }
-
-                return new DirectoryInfo(directoryPath);
-            }
-            catch (IOException)
-            {
-                return new Alphaleonis.Win32.Filesystem.DirectoryInfo(directoryPath);
-            }
+            return new DirectoryInfo(directoryPath);
         }
 
-        public dynamic get_directory_info_from_file_path(string filePath)
+        public DirectoryInfo get_directory_info_from_file_path(string filePath)
         {
-            try
-            {
-                if (!string.IsNullOrWhiteSpace(filePath) && filePath.Length >= MAX_PATH_FILE)
-                {
-                    return new Alphaleonis.Win32.Filesystem.DirectoryInfo(filePath).Parent;
-                }
-
-                return new DirectoryInfo(filePath).Parent;
-            }
-            catch (IOException)
-            {
-                return new Alphaleonis.Win32.Filesystem.DirectoryInfo(filePath).Parent;
-            }
+            return new DirectoryInfo(filePath).Parent;
         }
 
         public void create_directory(string directoryPath)
@@ -635,14 +541,7 @@ namespace chocolatey.infrastructure.filesystem
             allow_retries(
                 () =>
                 {
-                    try
-                    {
-                        Directory.CreateDirectory(directoryPath);
-                    }
-                    catch (IOException)
-                    {
-                        Alphaleonis.Win32.Filesystem.Directory.CreateDirectory(directoryPath);
-                    }
+                    Directory.CreateDirectory(directoryPath);
                 });
         }
 
@@ -657,14 +556,7 @@ namespace chocolatey.infrastructure.filesystem
                 allow_retries(
                     () =>
                     {
-                        try
-                        {
-                            Directory.Move(directoryPath, newDirectoryPath);
-                        }
-                        catch (IOException)
-                        {
-                            Alphaleonis.Win32.Filesystem.Directory.Move(directoryPath, newDirectoryPath);
-                        }
+                        Directory.Move(directoryPath, newDirectoryPath);
                     });
             }
             catch (Exception ex)
@@ -760,14 +652,7 @@ namespace chocolatey.infrastructure.filesystem
             allow_retries(
                 () =>
                 {
-                    try
-                    {
-                        Directory.Delete(directoryPath, recursive);
-                    }
-                    catch (IOException)
-                    {
-                        Alphaleonis.Win32.Filesystem.Directory.Delete(directoryPath, recursive);
-                    }
+                    Directory.Delete(directoryPath, recursive);
                 }, isSilent: isSilent);
         }
 

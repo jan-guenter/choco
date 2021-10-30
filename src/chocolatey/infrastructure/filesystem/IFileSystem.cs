@@ -123,7 +123,7 @@ namespace chocolatey.infrastructure.filesystem
         /// </summary>
         /// <param name="filePath">Path to an existing file</param>
         /// <returns>FileInfo object or reimplementation of a FileInfo object that works with greater than 260 chars</returns>
-        dynamic get_file_info_for(string filePath);
+        FileInfo get_file_info_for(string filePath);
 
         /// <summary>
         ///   Gets the file mod date.
@@ -151,35 +151,35 @@ namespace chocolatey.infrastructure.filesystem
         /// </summary>
         /// <param name="file">File to check - FileInfo or some representation of FileInfo</param>
         /// <returns>True if the file has the System attribute marked, otherwise false</returns>
-        bool is_system_file(dynamic file);
+        bool is_system_file(FileInfo file);
 
         /// <summary>
         ///   Determines if a file is a read only file
         /// </summary>
         /// <param name="file">File to check - FileInfo or some representation of FileInfo</param>
         /// <returns>True if the file has the ReadOnly attribute marked, otherwise false</returns>
-        bool is_readonly_file(dynamic file);
+        bool is_readonly_file(FileInfo file);
         
         /// <summary>
         ///   Determines if a file is a hidden file
         /// </summary>
         /// <param name="file">File to check - FileInfo or some representation of FileInfo</param>
         /// <returns>True if the file has the Hidden attribute marked, otherwise false</returns>
-        bool is_hidden_file(dynamic file);
+        bool is_hidden_file(FileInfo file);
 
         /// <summary>
         ///   Determines if a file is encrypted or not
         /// </summary>
         /// <param name="file">File to check - FileInfo or some representation of FileInfo</param>
         /// <returns>True if the file has the Encrypted attribute marked, otherwise false</returns>
-        bool is_encrypted_file(dynamic file);
+        bool is_encrypted_file(FileInfo file);
 
         /// <summary>
         ///   Determines the older of the file dates, Creation Date or Modified Date
         /// </summary>
         /// <param name="file">File to analyze - FileInfo or some representation of FileInfo</param>
         /// <returns>The oldest date on the file</returns>
-        string get_file_date(dynamic file);
+        string get_file_date(FileInfo file);
 
         /// <summary>
         ///   Moves a specified file to a new location, providing the option to specify a new file name.
@@ -321,14 +321,14 @@ namespace chocolatey.infrastructure.filesystem
         /// </summary>
         /// <param name="directoryPath">Full path to the directory you want the directory information for</param>
         /// <returns>DirectoryInfo object or reimplementation of a DirectoryInfo object that works with greater than 248 chars</returns>
-        dynamic get_directory_info_for(string directoryPath);
+        DirectoryInfo get_directory_info_for(string directoryPath);
 
         /// <summary>
         ///   Returns a DirectoryInfo object from a string to a filepath
         /// </summary>
         /// <param name="filePath">Full path to the file you want directory information for</param>
         /// <returns>DirectoryInfo object or reimplementation of a DirectoryInfo object that works with greater than 248 chars</returns>
-        dynamic get_directory_info_from_file_path(string filePath);
+        DirectoryInfo get_directory_info_from_file_path(string filePath);
 
         /// <summary>
         ///   Creates all directories and subdirectories in the specified path.

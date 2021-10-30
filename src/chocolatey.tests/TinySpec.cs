@@ -1,4 +1,4 @@
-﻿// ==============================================================================
+// ==============================================================================
 // 
 // Fervent Coder Copyright © 2011 - Released under the Apache 2.0 License
 // 
@@ -15,10 +15,10 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 // ==============================================================================
-
 namespace chocolatey.tests
 {
     using System;
+    using System.IO;
     using NUnit.Framework;
     using chocolatey.infrastructure.app;
     using chocolatey.infrastructure.logging;
@@ -32,9 +32,10 @@ namespace chocolatey.tests
 
         private static readonly string InstallLocationVariable = Environment.GetEnvironmentVariable(ApplicationParameters.ChocolateyInstallEnvironmentVariableName);
 
-        [SetUp]
+        [OneTimeSetUp]
         public virtual void BeforeEverything()
         {
+            Directory.SetCurrentDirectory(TestContext.CurrentContext.WorkDirectory);
             Environment.SetEnvironmentVariable(ApplicationParameters.ChocolateyInstallEnvironmentVariableName, string.Empty);
             MockLogger = new MockLogger();
             Log.InitializeWith(MockLogger);
@@ -46,7 +47,7 @@ namespace chocolatey.tests
         {
         }
 
-        [TearDown]
+        [OneTimeTearDown]
         public void AfterEverything()
         {
             Environment.SetEnvironmentVariable(ApplicationParameters.ChocolateyInstallEnvironmentVariableName, InstallLocationVariable);
@@ -61,7 +62,7 @@ namespace chocolatey.tests
             get { return NUnitSetup.MockLogger; }
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void Setup()
         {
             if (MockLogger != null) MockLogger.reset();
@@ -94,7 +95,7 @@ namespace chocolatey.tests
         {
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void TearDown()
         {
             AfterObservations();
@@ -117,17 +118,17 @@ namespace chocolatey.tests
     {
     }
 
-
+    
     public class ConcernForAttribute : Attribute
     {
         public string Name { get; set; }
-
+        
         public ConcernForAttribute(string name)
         {
             Name = name;
         }
     }
-
+    
     public class NotWorkingAttribute : CategoryAttribute
     {
         public string Reason { get; set; }
@@ -165,15 +166,6 @@ namespace chocolatey.tests
             : base("Integration")
         {
         }
-    }
-
-    public class ExpectedExceptionAttribute : NUnit.Framework.ExpectedExceptionAttribute
-    {
-        public ExpectedExceptionAttribute(Type exceptionType) : base(exceptionType)
-        {}
-
-        public ExpectedExceptionAttribute(string exceptionName) : base(exceptionName)
-        {}
     }
 
     // ReSharper restore InconsistentNaming

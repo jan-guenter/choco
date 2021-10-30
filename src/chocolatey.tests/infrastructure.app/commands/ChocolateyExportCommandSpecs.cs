@@ -44,8 +44,8 @@ namespace chocolatey.tests.infrastructure.app.commands
 
             public void reset()
             {
-                nugetService.ResetCalls();
-                fileSystem.ResetCalls();
+                nugetService.Invocations.Clear();
+                fileSystem.Invocations.Clear();
             }
         }
 

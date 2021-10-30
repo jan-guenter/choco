@@ -40,7 +40,7 @@ namespace chocolatey.tests
         public void reset()
         {
             Messages.Clear();
-            this.ResetCalls();
+            this.Invocations.Clear();
             LogMessagesToConsole = false;
         }
 

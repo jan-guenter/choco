@@ -37,8 +37,8 @@ namespace chocolatey.tests.infrastructure.app.nuget
             public override void Context()
             {
                 configuration = new ChocolateyConfiguration();
-                nugetLogger.ResetCalls();
-                packageDownloader.ResetCalls();
+                nugetLogger.Invocations.Clear();
+                packageDownloader.Invocations.Clear();
             }
 
             public override void Because()

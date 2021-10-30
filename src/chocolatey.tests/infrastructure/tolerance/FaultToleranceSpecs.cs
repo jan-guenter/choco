@@ -42,25 +42,22 @@ namespace chocolatey.tests.infrastructure.tolerance
             }
 
             [Fact]
-            [ExpectedException(typeof(ApplicationException))]
             public void should_not_allow_the_number_of_retries_to_be_zero()
             {
                 reset();
 
-                FaultTolerance.retry(
-                    0,
-                    () =>
-                    {
-                    });
+                Assert.Throws<ApplicationException>(() => FaultTolerance.retry(0, () => { }));
             }
 
             [Fact]
-            [ExpectedException(typeof(Exception))]
             public void should_throw_an_error_if_retries_are_reached()
             {
                 reset();
 
-                FaultTolerance.retry(2, () => { throw new Exception("YIKES"); }, waitDurationMilliseconds: 0);
+                Assert.Throws<Exception>(
+                    () => FaultTolerance.retry(2, () => { throw new Exception("YIKES"); }, waitDurationMilliseconds: 0),
+                    "YIKES"
+                );
             }
 
             [Fact]
@@ -166,30 +163,34 @@ namespace chocolatey.tests.infrastructure.tolerance
             }
 
             [Fact]
-            [ExpectedException(typeof(Exception))]
             public void should_throw_an_error_if_throwError_set_to_true()
             {
                 reset();
-
-                FaultTolerance.try_catch_with_logging_exception(
-                    () => { throw new Exception("This is the message"); },
-                    "You have an error",
-                    throwError: true
+                Assert.Throws<Exception>(
+                    () => FaultTolerance.try_catch_with_logging_exception(
+                        () => { throw new Exception("This is the message"); },
+                        "You have an error",
+                        throwError: true
+                    ),
+                    "This is the message"
                 );
             }
 
             [Fact]
-            [ExpectedException(typeof(Exception))]
             public void should_still_throw_an_error_when_warn_is_set_if_throwError_set_to_true()
             {
                 reset();
 
-                FaultTolerance.try_catch_with_logging_exception(
-                    () => { throw new Exception("This is the message"); },
-                    "You have an error",
-                    logWarningInsteadOfError: true,
-                    throwError: true
+                Assert.Throws<Exception>(
+                    () => FaultTolerance.try_catch_with_logging_exception(
+                        () => { throw new Exception("This is the message"); },
+                        "You have an error",
+                        logWarningInsteadOfError: true,
+                        throwError: true
+                    ),
+                    "This is the message"
                 );
+
             }
         }
     }

@@ -127,7 +127,7 @@ namespace chocolatey.tests.infrastructure.app.commands
             public void reset()
             {
                 unparsedArgs.Clear();
-                configSettingsService.ResetCalls();
+                configSettingsService.Invocations.Clear();
             }
 
             [Fact]
