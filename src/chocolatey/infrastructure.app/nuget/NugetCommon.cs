@@ -146,7 +146,9 @@ namespace chocolatey.infrastructure.app.nuget
                     }
                     else
                     {
-                        repositories.Add(new DataServicePackageRepository(new RedirectedHttpClient(uri, bypassProxy) { UserAgent = "Chocolatey Core" }, packageDownloader) { Logger = nugetLogger });
+                        var http = new RedirectedHttpClient(uri, bypassProxy) { UserAgent = "Chocolatey Core" };
+                        var repo = new DataServicePackageRepository(http, packageDownloader) { Logger = nugetLogger };
+                        repositories.Add(repo);
                     }
                 }
                 catch (Exception)

@@ -21,7 +21,8 @@ namespace chocolatey.tests.infrastructure.app.commands
     using chocolatey.infrastructure.app.attributes;
     using chocolatey.infrastructure.app.commands;
     using chocolatey.infrastructure.app.configuration;
-    using Should;
+    using FluentAssertions;
+
 
     public class ChocolateyHelpCommandSpecs
     {
@@ -48,7 +49,7 @@ namespace chocolatey.tests.infrastructure.app.commands
             [Fact]
             public void should_implement_help()
             {
-                results.ShouldContain("help");
+                results.Should().Contain("help");
             }
         }
     }

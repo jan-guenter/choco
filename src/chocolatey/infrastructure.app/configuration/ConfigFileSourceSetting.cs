@@ -17,6 +17,7 @@
 namespace chocolatey.infrastructure.app.configuration
 {
     using System;
+    using System.Security.Policy;
     using System.Xml.Serialization;
 
     /// <summary>
@@ -84,18 +85,18 @@ namespace chocolatey.infrastructure.app.configuration
 
         public override int GetHashCode()
         {
-            return HashCode
-                .Of(Id)
-                .And(Value)
-                .And(Disabled)
-                .And(BypassProxy)
-                .And(AllowSelfService)
-                .And(VisibleToAdminsOnly)
-                .And(UserName)
-                .And(Password)
-                .And(Priority)
-                .And(Certificate)
-                .And(CertificatePassword);
+            return HashCode.Combine(HashCode.Combine(
+                Id,
+                Value,
+                Disabled,
+                BypassProxy,
+                AllowSelfService,
+                VisibleToAdminsOnly,
+                UserName,
+                Password),
+                Priority,
+                Certificate,
+                CertificatePassword);
         }
     }
 }

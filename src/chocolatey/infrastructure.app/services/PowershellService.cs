@@ -253,10 +253,6 @@ namespace chocolatey.infrastructure.app.services
                 {
                     installerRun = true;
 
-                    if (configuration.Features.UsePowerShellHost)
-                    {
-                        add_assembly_resolver();
-                    }
 
                     var result = new PowerShellExecutionResults
                     {
@@ -275,10 +271,6 @@ namespace chocolatey.infrastructure.app.services
                         result.ExitCode = 1;
                     }
 
-                    if (configuration.Features.UsePowerShellHost)
-                    {
-                        remove_assembly_resolver();
-                    }
 
                     if (result.StandardErrorWritten && configuration.Features.FailOnStandardError)
                     {
@@ -477,28 +469,12 @@ namespace chocolatey.infrastructure.app.services
             SecurityProtocol.set_protocol(configuration, provideWarning:false);
         }
 
-        private ResolveEventHandler _handler = null;
 
-        private void add_assembly_resolver()
-        {
-            _handler = (sender, args) =>
-            {
-                var requestedAssembly = new AssemblyName(args.Name);
 
-                this.Log().Debug(ChocolateyLoggers.Verbose, "Redirecting {0}, requested by '{1}'".format_with(args.Name, args.RequestingAssembly == null ? string.Empty : args.RequestingAssembly.FullName));
 
-                AppDomain.CurrentDomain.AssemblyResolve -= _handler;
 
-                // we build against v1 - everything should update in a kosher manner to the newest, but it may not.
-                var assembly = attempt_version_load(requestedAssembly, new Version(5, 0, 0, 0)) ?? attempt_version_load(requestedAssembly, new Version(4, 0, 0, 0));
-                if (assembly == null) assembly = attempt_version_load(requestedAssembly, new Version(3, 0, 0, 0));
-                if (assembly == null) assembly = attempt_version_load(requestedAssembly, new Version(1, 0, 0, 0));
 
-                return assembly;
-            };
 
-            AppDomain.CurrentDomain.AssemblyResolve += _handler;
-        }
 
         private System.Reflection.Assembly attempt_version_load(AssemblyName requestedAssembly, Version version)
         {
@@ -525,13 +501,6 @@ namespace chocolatey.infrastructure.app.services
             }
         }
 
-        private void remove_assembly_resolver()
-        {
-            if (_handler != null)
-            {
-                AppDomain.CurrentDomain.AssemblyResolve -= _handler;
-            }
-        }
 
         public PowerShellExecutionResults run_host(ChocolateyConfiguration config, string chocoPowerShellScript, Action<Pipeline> additionalActionsBeforeScript)
         {

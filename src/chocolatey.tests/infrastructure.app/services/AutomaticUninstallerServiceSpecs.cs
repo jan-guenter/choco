@@ -30,6 +30,7 @@ namespace chocolatey.tests.infrastructure.app.services
     using chocolatey.infrastructure.app.services;
     using chocolatey.infrastructure.commands;
     using chocolatey.infrastructure.results;
+
     using Moq;
     using NuGet;
     using IFileSystem = chocolatey.infrastructure.filesystem.IFileSystem;
@@ -88,8 +89,10 @@ namespace chocolatey.tests.infrastructure.app.services
                 fileSystem.Setup(f => f.get_full_path(expectedUninstallString)).Returns(expectedUninstallString);
                 fileSystem.Setup(x => x.file_exists(expectedUninstallString)).Returns(true);
 
-                var field = typeof(ApplicationParameters).GetField("AllowPrompts");
-                field.SetValue(null, false);
+                // TODO: dirty !!!!
+                ApplicationParameters.AllowPrompts = false;
+                //var field = typeof(ApplicationParameters).GetField("AllowPrompts");
+                //field.SetValue(null, false);
             }
         }
 

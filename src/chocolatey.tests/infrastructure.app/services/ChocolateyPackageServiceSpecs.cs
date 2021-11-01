@@ -27,12 +27,13 @@ using chocolatey.infrastructure.results;
 using chocolatey.infrastructure.services;
 using Moq;
 using NuGet;
-using NUnit.Framework;
-using Should;
+using FluentAssertions;
 using IFileSystem = chocolatey.infrastructure.filesystem.IFileSystem;
 
 namespace chocolatey.tests.infrastructure.app.services
 {
+
+
     public class ChocolateyPackageServiceSpecs
     {
         public abstract class ChocolateyPackageServiceSpecsBase : TinySpec
@@ -116,25 +117,25 @@ namespace chocolatey.tests.infrastructure.app.services
                 result = Service.install_run(Configuration);
             }
 
-            [Test]
+            [Fact]
             public void should_return_package_that_should_have_been_installed()
             {
-                result.Keys.ShouldContain("test-feature");
+                result.Keys.Should().Contain("test-feature");
             }
 
-            [Test]
+            [Fact]
             public void should_have_called_runner_for_windows_features_source()
             {
                 FeaturesRunner.Verify(r => r.install_run(It.Is<ChocolateyConfiguration>(c => c.PackageNames == "test-feature"), It.IsAny<Action<PackageResult>>()), Times.Once);
             }
 
-            [Test]
+            [Fact]
             public void should_not_have_called_runner_for_windows_features_source_with_other_package_names()
             {
                 FeaturesRunner.Verify(r => r.install_run(It.Is<ChocolateyConfiguration>(c => c.PackageNames != "test-feature"), It.IsAny<Action<PackageResult>>()), Times.Never);
             }
 
-            [Test]
+            [Fact]
             public void should_not_have_called_normal_source_runner_for_non_empty_packages()
             {
                 // The normal source runners will be called with an argument

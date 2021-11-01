@@ -18,7 +18,9 @@ namespace chocolatey.infrastructure.app.configuration
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Xml.Serialization;
+    using utility;
 
     /// <summary>
     ///   XML configuration file
@@ -67,13 +69,11 @@ namespace chocolatey.infrastructure.app.configuration
 
         public override int GetHashCode()
         {
-            return HashCode
-                .Of(CacheLocation)
-                .And(CommandExecutionTimeoutSeconds)
-                .AndEach(ConfigSettings)
-                .AndEach(Sources)
-                .AndEach(Features)
-                .AndEach(ApiKeys);
+            return HashCode.Combine(CacheLocation, CommandExecutionTimeoutSeconds)
+                           .CombineAll(ConfigSettings)
+                           .CombineAll(Sources)
+                           .CombineAll(Features)
+                           .CombineAll(ApiKeys);
         }
     }
 }

@@ -26,7 +26,8 @@ namespace chocolatey.tests.infrastructure.app.commands
     using chocolatey.infrastructure.commandline;
     using chocolatey.infrastructure.filesystem;
     using Moq;
-    using Should;
+    using FluentAssertions;
+
 
     public class ChocolateyExportCommandSpecs
     {
@@ -61,7 +62,7 @@ namespace chocolatey.tests.infrastructure.app.commands
             [Fact]
             public void should_implement_help()
             {
-                results.ShouldContain("export");
+                results.Should().Contain("export");
             }
         }
 
@@ -83,25 +84,25 @@ namespace chocolatey.tests.infrastructure.app.commands
             [Fact]
             public void should_add_output_file_path_to_the_option_set()
             {
-                optionSet.Contains("output-file-path").ShouldBeTrue();
+                optionSet.Contains("output-file-path").Should().BeTrue();
             }
 
             [Fact]
             public void should_add_short_version_of_output_file_path_to_the_option_set()
             {
-                optionSet.Contains("o").ShouldBeTrue();
+                optionSet.Contains("o").Should().BeTrue();
             }
 
             [Fact]
             public void should_add_include_version_numbers_to_the_option_set()
             {
-                optionSet.Contains("include-version-numbers").ShouldBeTrue();
+                optionSet.Contains("include-version-numbers").Should().BeTrue();
             }
 
             [Fact]
             public void should_add_include_version_to_the_option_set()
             {
-                optionSet.Contains("include-version").ShouldBeTrue();
+                optionSet.Contains("include-version").Should().BeTrue();
             }
         }
 
@@ -129,7 +130,7 @@ namespace chocolatey.tests.infrastructure.app.commands
                 unparsedArgs.Add(" ");
                 because();
 
-                configuration.ExportCommand.OutputFilePath.ShouldEqual("packages.config");
+                configuration.ExportCommand.OutputFilePath.Should().Be("packages.config");
             }
 
             [Fact]
@@ -139,7 +140,7 @@ namespace chocolatey.tests.infrastructure.app.commands
                 unparsedArgs.Add("custompackages.config");
                 because();
 
-                configuration.ExportCommand.OutputFilePath.ShouldEqual("custompackages.config");
+                configuration.ExportCommand.OutputFilePath.Should().Be("custompackages.config");
             }
         }
 
@@ -160,9 +161,9 @@ namespace chocolatey.tests.infrastructure.app.commands
             public void should_log_the_message_we_expect()
             {
                 var messages = MockLogger.MessagesFor(LogLevel.Info);
-                messages.ShouldNotBeEmpty();
-                messages.Count.ShouldEqual(1);
-                messages[0].ShouldContain("Export would have been with options");
+                messages.Should().NotBeEmpty();
+                messages.Count.Should().Be(1);
+                messages[0].Should().Contain("Export would have been with options");
             }
         }
 

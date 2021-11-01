@@ -26,6 +26,7 @@ namespace chocolatey.tests.integration
     using chocolatey.infrastructure.commands;
     using chocolatey.infrastructure.filesystem;
     using chocolatey.infrastructure.platforms;
+    using NUnit.Framework;
 
     public class Scenario
     {
@@ -35,7 +36,7 @@ namespace chocolatey.tests.integration
 
         public static string get_top_level()
         {
-            return _fileSystem.get_directory_name(_fileSystem.get_current_assembly_path());
+            return TestContext.CurrentContext.WorkDirectory;
         }
 
         public static string get_package_install_path()
@@ -74,7 +75,7 @@ namespace chocolatey.tests.integration
         public static void add_packages_to_source_location(ChocolateyConfiguration config, string pattern)
         {
             _fileSystem.create_directory_if_not_exists(config.Sources);
-            var contextDir = _fileSystem.combine_paths(get_top_level(), "context");
+            var contextDir = _fileSystem.combine_paths(TestContext.CurrentContext.TestDirectory, "context");
             var files = _fileSystem.get_files(contextDir, pattern, SearchOption.AllDirectories);
 
             foreach (var file in files.or_empty_list_if_null())

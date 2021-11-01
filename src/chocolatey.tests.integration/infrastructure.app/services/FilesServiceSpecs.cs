@@ -28,7 +28,8 @@ namespace chocolatey.tests.integration.infrastructure.app.services
     using chocolatey.infrastructure.results;
     using chocolatey.infrastructure.services;
     using Moq;
-    using Should;
+    using FluentAssertions;
+    using NUnit.Framework;
 
     public class FilesServiceSpecs
     {
@@ -57,7 +58,7 @@ namespace chocolatey.tests.integration.infrastructure.app.services
             public override void Context()
             {
                 base.Context();
-                _contextPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "infrastructure", "filesystem");
+                _contextPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "infrastructure", "filesystem");
                 _theLockedFile = Path.Combine(_contextPath, "Slipsum.txt");
                 _packageResult = new PackageResult("bob", "1.2.3", FileSystem.get_directory_name(_theLockedFile));
 
@@ -96,13 +97,13 @@ namespace chocolatey.tests.integration.infrastructure.app.services
                     if (message.Contains("The process cannot access the file")) lockedFiles = true;
                 }
 
-                lockedFiles.ShouldBeTrue();
+                lockedFiles.Should().BeTrue();
             }
 
             [Fact]
             public void should_return_a_special_code_for_locked_files()
             {
-                _result.Files.FirstOrDefault(x => x.Path == _theLockedFile).Checksum.ShouldEqual(ApplicationParameters.HashProviderFileLocked);
+                _result.Files.FirstOrDefault(x => x.Path == _theLockedFile).Checksum.Should().Be(ApplicationParameters.HashProviderFileLocked);
             }
         }
     }

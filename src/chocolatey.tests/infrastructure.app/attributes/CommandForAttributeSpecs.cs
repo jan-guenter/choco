@@ -17,7 +17,9 @@
 namespace chocolatey.tests.infrastructure.app.attributes
 {
     using chocolatey.infrastructure.app.attributes;
-    using Should;
+    using FluentAssertions;
+
+    using NUnit.Framework;
 
     public class CommandForAttributeSpecs
     {
@@ -43,7 +45,7 @@ namespace chocolatey.tests.infrastructure.app.attributes
             [Fact]
             public void should_be_set_to_the_string()
             {
-                result.ShouldEqual("bob");
+                result.Should().Be("bob");
             }
         }
     }

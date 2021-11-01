@@ -19,7 +19,7 @@ namespace chocolatey.tests.infrastructure.tolerance
     using System;
     using chocolatey.infrastructure.tolerance;
     using NUnit.Framework;
-    using Should;
+    using FluentAssertions;
 
     public class FaultToleranceSpecs
     {
@@ -74,7 +74,7 @@ namespace chocolatey.tests.infrastructure.tolerance
                     // don't care
                 }
 
-                MockLogger.MessagesFor(LogLevel.Warn).Count.ShouldEqual(2);
+                MockLogger.MessagesFor(LogLevel.Warn).Count.Should().Be(2);
             }
 
             [Fact]
@@ -99,7 +99,7 @@ namespace chocolatey.tests.infrastructure.tolerance
                     // don't care
                 }
 
-                i.ShouldEqual(10);
+                i.Should().Be(10);
             }
 
             [Fact]
@@ -110,9 +110,9 @@ namespace chocolatey.tests.infrastructure.tolerance
                 var i = 0;
                 FaultTolerance.retry(3, () => { i += 1; }, waitDurationMilliseconds: 0);
 
-                i.ShouldEqual(1);
+                i.Should().Be(1);
 
-                MockLogger.MessagesFor(LogLevel.Warn).Count.ShouldEqual(0);
+                MockLogger.MessagesFor(LogLevel.Warn).Count.Should().Be(0);
             }
         }
 
@@ -132,7 +132,7 @@ namespace chocolatey.tests.infrastructure.tolerance
                     "You have an error"
                 );
 
-                MockLogger.MessagesFor(LogLevel.Error).Count.ShouldEqual(1);
+                MockLogger.MessagesFor(LogLevel.Error).Count.Should().Be(1);
             }
 
             [Fact]
@@ -145,7 +145,7 @@ namespace chocolatey.tests.infrastructure.tolerance
                     "You have an error"
                 );
 
-                MockLogger.MessagesFor(LogLevel.Error)[0].ShouldEqual("You have an error:{0} This is the message".format_with(Environment.NewLine));
+                MockLogger.MessagesFor(LogLevel.Error)[0].Should().Be("You have an error:{0} This is the message".format_with(Environment.NewLine));
             }
 
             [Fact]
@@ -159,7 +159,7 @@ namespace chocolatey.tests.infrastructure.tolerance
                     logWarningInsteadOfError: true
                 );
 
-                MockLogger.MessagesFor(LogLevel.Warn).Count.ShouldEqual(1);
+                MockLogger.MessagesFor(LogLevel.Warn).Count.Should().Be(1);
             }
 
             [Fact]

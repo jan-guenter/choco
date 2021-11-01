@@ -77,38 +77,28 @@ namespace chocolatey.tests.integration
 
             var applicationLocation = fileSystem.get_directory_name(fileSystem.get_current_assembly_path());
 
-            var field = typeof(ApplicationParameters).GetField("InstallLocation");
-            field.SetValue(null, applicationLocation);
+            ApplicationParameters.InstallLocation = applicationLocation;
 
-            field = typeof(ApplicationParameters).GetField("LicenseFileLocation");
-            field.SetValue(null, fileSystem.combine_paths(ApplicationParameters.InstallLocation, "license", "chocolatey.license.xml"));
+            ApplicationParameters.LicenseFileLocation = fileSystem.combine_paths(ApplicationParameters.InstallLocation, "license", "chocolatey.license.xml");
 
-            field = typeof(ApplicationParameters).GetField("LoggingLocation");
-            field.SetValue(null, fileSystem.combine_paths(ApplicationParameters.InstallLocation, "logs"));
+            ApplicationParameters.LoggingLocation = fileSystem.combine_paths(ApplicationParameters.InstallLocation, "logs");
 
-            field = typeof(ApplicationParameters).GetField("GlobalConfigFileLocation");
-            field.SetValue(null, fileSystem.combine_paths(ApplicationParameters.InstallLocation, "config", "chocolatey.config"));
+            ApplicationParameters.GlobalConfigFileLocation = fileSystem.combine_paths(ApplicationParameters.InstallLocation, "config", "chocolatey.config");
 
-            field = typeof(ApplicationParameters).GetField("PackagesLocation");
-            field.SetValue(null, fileSystem.combine_paths(ApplicationParameters.InstallLocation, "lib"));
+            ApplicationParameters.PackagesLocation = fileSystem.combine_paths(ApplicationParameters.InstallLocation, "lib");
 
-            field = typeof(ApplicationParameters).GetField("PackageFailuresLocation");
-            field.SetValue(null, fileSystem.combine_paths(ApplicationParameters.InstallLocation, "lib-bad"));
+            ApplicationParameters.PackageFailuresLocation = fileSystem.combine_paths(ApplicationParameters.InstallLocation, "lib-bad");
 
-            field = typeof(ApplicationParameters).GetField("PackageBackupLocation");
-            field.SetValue(null, fileSystem.combine_paths(ApplicationParameters.InstallLocation, "lib-bkp"));
+            ApplicationParameters.PackageBackupLocation = fileSystem.combine_paths(ApplicationParameters.InstallLocation, "lib-bkp");
 
-            field = typeof(ApplicationParameters).GetField("ShimsLocation");
-            field.SetValue(null, fileSystem.combine_paths(ApplicationParameters.InstallLocation, "bin"));
+            ApplicationParameters.ShimsLocation = fileSystem.combine_paths(ApplicationParameters.InstallLocation, "bin");
 
-            field = typeof(ApplicationParameters).GetField("ChocolateyPackageInfoStoreLocation");
-            field.SetValue(null, fileSystem.combine_paths(ApplicationParameters.InstallLocation, ".chocolatey"));
+            ApplicationParameters.ChocolateyPackageInfoStoreLocation = fileSystem.combine_paths(ApplicationParameters.InstallLocation, ".chocolatey");
 
-            field = typeof(ApplicationParameters).GetField("LockTransactionalInstallFiles");
-            field.SetValue(null, false);
+            ApplicationParameters.LockTransactionalInstallFiles = false;
 
             // we need to speed up specs a bit, so only try filesystem locking operations twice
-            field = fileSystem.GetType().GetField("TIMES_TO_TRY_OPERATION", BindingFlags.Instance | BindingFlags.NonPublic);
+            var field = fileSystem.GetType().GetField("TIMES_TO_TRY_OPERATION", BindingFlags.Instance | BindingFlags.NonPublic);
             if (field != null)
             {
                 field.SetValue(fileSystem, 2);
